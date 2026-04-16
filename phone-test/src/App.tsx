@@ -1,16 +1,16 @@
-import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/Login/Login';
 import { CallsListPage } from './pages/CallsList';
 import { CallDetailsPage } from './pages/CallDetails';
 import { Tractor } from '@aircall/tractor';
-
 import './App.css';
 import { ProtectedLayout } from './components/routing/ProtectedLayout';
 import { darkTheme } from './style/theme/darkTheme';
 import { RouterProvider } from 'react-router-dom';
 import { GlobalAppStyle } from './style/global';
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, from } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import { onError } from '@apollo/client/link/error';
 import { AuthProvider } from './hooks/useAuth';
 
 const httpLink = createHttpLink({
@@ -18,36 +18,60 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
   const accessToken = localStorage.getItem('access_token');
-  const parsedToken = accessToken ? JSON.parse(accessToken) : undefined;
+  let token = null;
+  try {
+    token = accessToken ? JSON.parse(accessToken) : null;
+  } catch {
+    token = accessToken;
+  }
 
-  // return the headers to the context so httpLink can read them
   return {
     headers: {
       ...headers,
-      authorization: accessToken ? `Bearer ${parsedToken}` : ''
+      authorization: token ? `Bearer ${token}` : ''
     }
   };
 });
 
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
+const errorLink = onError(({ graphQLErrors, operation, forward }) => {
+  if (graphQLErrors) {
+    for (const err of graphQLErrors) {
+      if (err.extensions?.code === 'UNAUTHENTICATED') {
+        const refreshToken = localStorage.getItem('refresh_token');
+        let token = null;
+        try {
+          token = refreshToken ? JSON.parse(refreshToken) : null;
+        } catch {
+          token = refreshToken;
+        }
+        if (token) {
+          const oldHeaders = operation.getContext().headers;
+          operation.setContext({
+            headers: {
+              ...oldHeaders,
+              authorization: `Bearer ${token}`
+            }
+          });
+          return forward(operation);
+        }
+      }
+    }
+  }
 });
 
-// NOTE: The backend uses the legacy 'subscriptions-transport-ws' protocol, not 'graphql-ws'.
-// If you are implementing real-time features, use 'subscriptions-transport-ws' and 'WebSocketLink'.
-// We have installed 'subscriptions-transport-ws' for you.
-// import { WebSocketLink } from '@apollo/client/link/ws';
-// import { SubscriptionClient } from 'subscriptions-transport-ws';
+const client = new ApolloClient({
+  link: from([errorLink, authLink, httpLink]),
+  cache: new InMemoryCache()
+});
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<AuthProvider />}>
       <Route path="/login" element={<LoginPage />} />
+      <Route index element={<Navigate to="/login" replace />} />
       <Route path="/calls" element={<ProtectedLayout />}>
-        <Route path="/calls" element={<CallsListPage />} />
+        <Route index element={<CallsListPage />} />
         <Route path="/calls/:callId" element={<CallDetailsPage />} />
       </Route>
     </Route>

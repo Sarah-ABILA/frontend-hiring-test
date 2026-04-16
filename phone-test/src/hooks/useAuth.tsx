@@ -1,27 +1,27 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { LOGIN } from '../gql/mutations';
 import { useLocalStorage } from './useLocalStorage';
 import { useMutation } from '@apollo/client';
 
 const AuthContext = createContext({
-  login: ({}) => {},
-  logout: () => {}
+  login: ({}: any) => {},
+  logout: () => {},
+  user: null as any
 });
 
-export interface AuthPRoviderProps {
-  children: React.ReactNode;
-}
-
 export const AuthProvider = () => {
-  const [user, setUser] = useState();
-  const [status, setStatus] = useState('loading');
   const [accessToken, setAccessToken] = useLocalStorage('access_token', undefined);
   const [refreshToken, setRefreshToken] = useLocalStorage('refresh_token', undefined);
+  const [storedUser, setStoredUser] = useLocalStorage('user', null);
+  const [user, setUser] = useState<any>(storedUser);
   const [loginMutation] = useMutation(LOGIN);
   const navigate = useNavigate();
 
-  // call this function when you want to authenticate the user
+  useEffect(() => {
+    if (storedUser) setUser(storedUser);
+  }, []);
+
   const login = ({ username, password }: any) => {
     return loginMutation({
       variables: { input: { username, password } },
@@ -29,26 +29,25 @@ export const AuthProvider = () => {
         const { access_token, refresh_token, user } = login;
         setAccessToken(access_token);
         setRefreshToken(refresh_token);
+        setStoredUser(user);
         setUser(user);
-        console.log('redirect to calls');
         navigate('/calls');
       }
     });
   };
 
-  // call this function to sign out logged in user
   const logout = () => {
     setAccessToken(null);
     setRefreshToken(null);
+    setStoredUser(null);
+    setUser(null);
     navigate('/login', { replace: true });
   };
 
   const value = useMemo(() => {
-    return {
-      login,
-      logout
-    };
-  }, []);
+    return { login, logout, user };
+  }, [user]);
+
   return (
     <AuthContext.Provider value={value}>
       <Outlet />

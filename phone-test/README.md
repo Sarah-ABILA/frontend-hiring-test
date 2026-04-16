@@ -46,3 +46,41 @@ If you are asked to implement real-time features (Subscriptions), please note th
 
 We have pre-installed the `subscriptions-transport-ws` package for you.
 You should use `WebSocketLink` from `@apollo/client/link/ws` and `SubscriptionClient` from `subscriptions-transport-ws`.
+
+---
+
+## 🐛 Bug Fixes
+
+- **404 on root route** — Added a redirect from `/` to `/login` and fixed the missing index route
+- **Duplicate `/calls` route** — Fixed nested route that was duplicating the path
+- **`Welcome {username}!`** — Fixed broken template literal and missing user context in `useAuth`
+- **Session persistence** — User persisted in localStorage, survives page reloads
+- **Apollo error handling** — Added `errorLink` to handle `UNAUTHENTICATED` errors and retry with refresh token
+
+---
+
+## ✨ New Features
+
+### 🗂️ Call Filters
+Filter calls by type (All / Answered / Missed / Voicemail) and by direction (All / Inbound / Outbound).
+
+### 📝 Add Notes
+Add notes to any call directly from the call detail page. Saved via GraphQL mutation, displayed instantly.
+
+### 📦 Archive / Unarchive
+Archive or unarchive calls from the detail page with a single click.
+
+---
+
+## 🎨 UI/UX Improvements
+
+- **Login page** — Split-screen layout with Aircall branding
+- **Navbar** — Green Aircall navbar with avatar and logout
+- **Calls list** — Color-coded borders, badges, hover effects
+- **Call details** — Clean grid layout, inline note editor, archive button
+
+---
+
+## 👩‍💻 Author
+
+Sarah Abila — [GitHub](https://github.com/Sarah-ABILA) · [LinkedIn](https://linkedin.com/in/sarah-abila-278041378)
