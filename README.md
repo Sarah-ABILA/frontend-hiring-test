@@ -1,4 +1,19 @@
-# :phone: Aircall Frontend Hiring Test
+> ## 👩‍💻 Ma contribution à ce test
+>
+> J'ai pris en charge ce hiring test Aircall en avril 2026. Mon travail est intégralement documenté dans **[`phone-test/README.md`](phone-test/README.md)**.
+>
+> **Démo en ligne** : https://frontend-hiring-test-azure.vercel.app
+>
+> **Stack** : React 18 · TypeScript · Vite · Apollo Client (GraphQL) · Zustand · Dayjs
+>
+> **Synthèse** :
+> - 🐛 **5 corrections de bugs** : 404 sur la route racine, route `/calls` dupliquée, template `Welcome {username}` cassé, persistence de session via localStorage, gestion des erreurs Apollo avec refresh token.
+> - ✨ **3 nouvelles fonctionnalités** : filtres d'appels (type + direction), ajout de notes via mutation GraphQL, archivage/désarchivage des appels.
+> - 🎨 **Refonte UI/UX** : page de login en split-screen, navbar custom Aircall, liste d'appels avec badges colorés, page de détail en grille avec éditeur de note inline.
+>
+> _— [Sarah Abila](https://github.com/Sarah-ABILA)_
+
+---# :phone: Aircall Frontend Hiring Test
 
 Backed by over $220 million of investment since 2015, Aircall creates technology that fuels accessible, transparent and collaborative communication to empower our base of 14,000+ customers (and growing) to make authentic, human connections. With over 1.3M calls per day, we focus on user experience, collaboration and integration with other software.
 
